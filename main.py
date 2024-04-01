@@ -1,1 +1,2 @@
-print("Hello discord")
+def test():
+    print("Hello discord")
