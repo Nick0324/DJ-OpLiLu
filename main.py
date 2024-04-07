@@ -1,12 +1,4 @@
-import discord
-from discord.ext import commands
-
-client = commands.Bot(intents=discord.Intents.default(), command_prefix="!")
-
-
-def test_main():
-    print("Hello")
-
+from command_implementations import client
 
 file = open('token.txt', 'r')
 client.run(file.readline())
