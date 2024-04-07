@@ -19,7 +19,7 @@ async def join(ctx):
         if voice == None:
             await functions.join_channel(ctx)
         else:
-            await ctx.send(f"I'm already connected to **{ctx.author.voice.channel}**!")
+            await ctx.send(f"I'm already connected to **{ctx.author.voice.channel}** !")
     else:
         await ctx.send("You don't have the required role for that")
 
