@@ -2,10 +2,6 @@ import functions
 import discord
 from discord.ext import commands
 
-def is_connected(ctx):
-    voice_client = get(ctx.bot.voice_clients, guild=ctx.guild)
-    return voice_client and voice_client.is_connected()
-
 intents = discord.Intents.all()
 
 client = commands.Bot(intents=intents, command_prefix="!")
