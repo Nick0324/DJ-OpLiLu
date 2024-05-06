@@ -1,10 +1,23 @@
+import wavelink
 import functions
 import discord
 from discord.ext import commands
+from typing import cast
 
 intents = discord.Intents.all()
 
 client = commands.Bot(intents=intents, command_prefix="!")
+
+
+@client.event
+async def on_ready():
+    print("Bot is ready.")
+    client.loop.create_task(functions.node_connect())
+
+
+@client.event
+async def on_wavelink_node_ready(node: wavelink.Node):
+    print(f"Node is ready.")
 
 
 @client.command()
@@ -27,25 +40,38 @@ async def disconnect(ctx):
 
 
 @client.command()
-async def play(ctx, *args):
-    query = " ".join(args)
-    try:
-        voice_channel = ctx.author.voice.channel
-    except:
-        await ctx.send("```You need to connect to a voice channel first!```")
+async def play(ctx, *, query: str):
+    player = cast(wavelink.Player, ctx.voice_client)
+
+    if not player:
+        try:
+            player = await ctx.author.voice.channel.connect(cls=wavelink.Player)  # type: ignore
+        except AttributeError:
+            await ctx.send("Please join a voice channel first before using this command.")
+            return
+        except discord.ClientException:
+            await ctx.send("I was unable to join this voice channel. Please try again.")
+            return
+
+    player.autoplay = wavelink.AutoPlayMode.partial
+
+    if not hasattr(player, "home"):
+        player.home = ctx.channel
+    elif player.home != ctx.channel:
+        await ctx.send(f"You can only play songs in {player.home.mention}, as the player has already started there.")
         return
-    if functions.is_paused:
-        functions.vc.resume()
-    else:
-        song = functions.search_yt(query)
-        if type(song) == type(True):
-            await ctx.send(
-                "```Could not download the song. Incorrect format try another keyword. This could be due to playlist or a livestream format.```")
-        else:
-            if functions.is_playing:
-                await ctx.send(f"**#{len(functions.music_queue) + 2} -'{song['title']}'** added to the queue")
-            else:
-                await ctx.send(f"**'{song['title']}'** added to the queue")
-            functions.music_queue.append([song, voice_channel])
-            if not functions.is_playing:
-                await functions.play_music(ctx, client)
+
+    tracks: wavelink.Search = await wavelink.Playable.search(query)
+    if not tracks:
+        await ctx.send(f"{ctx.author.mention} - Could not find any tracks with that query. Please try again.")
+        return
+
+    track: wavelink.Playable = tracks[0]
+    await player.queue.put_wait(track)
+    await ctx.send(f"Added **`{track}`** to the queue.")
+
+    if not player.playing:
+        await player.play(player.queue.get())
+
+
+
