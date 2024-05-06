@@ -14,5 +14,5 @@ async def disconnect_channel(ctx):
 async def node_connect():
     from command_implementations import client
     await client.wait_until_ready()
-    node: wavelink.Node = wavelink.Node(uri='http://localhost:2333', password='youshallnotpass')
+    node: wavelink.Node = wavelink.Node(uri='https://lavalink4.alfari.id/', password='catfein')
     await wavelink.Pool.connect(nodes=[node], client=client, cache_capacity=None)

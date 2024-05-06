@@ -73,5 +73,31 @@ async def play(ctx, *, query: str):
     if not player.playing:
         await player.play(player.queue.get())
 
+@client.command(name="resume")
+async def pause_resume(ctx: commands.Context) -> None:
+    player: wavelink.Player = cast(wavelink.Player, ctx.voice_client)
+    if not player:
+        return
+
+    if not player.paused:
+        await ctx.message.add_reaction("\u274C")  # add X react to command
+        return
+    await player.pause(False)
+    await ctx.message.add_reaction("\u2705") #add ok react to command
+
+@client.command(name="pause")
+async def pause_resume(ctx: commands.Context) -> None:
+    player: wavelink.Player = cast(wavelink.Player, ctx.voice_client)
+    if not player:
+        return
+
+    if player.paused:
+        await ctx.message.add_reaction("\u274C")  # add X react to command
+        return
+    await player.pause(True)
+    await ctx.message.add_reaction("\u2705") #add ok react to command
+
+
+
 
 
