@@ -20,11 +20,18 @@ async def on_wavelink_node_ready(node: wavelink.Node):
     print(f"Node is ready.")
 
 
-@client.command()
+
+@client.command(name="join", pass_ctx=True)
 async def join(ctx):
+
+    voice = discord.utils.get(client.voice_clients,guild=ctx.guild)
     role = discord.utils.get(ctx.author.roles, name="dj")
+
     if role:
-        await functions.join_channel(ctx)
+        if voice == None:
+            await functions.join_channel(ctx)
+        else:
+            await ctx.send(f"I'm already connected to **{ctx.author.voice.channel}** !")
     else:
         await ctx.send("You don't have the required role for that")
 
