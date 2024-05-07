@@ -80,6 +80,30 @@ async def play(ctx, *, query: str):
     if not player.playing:
         await player.play(player.queue.get())
 
+@client.command()
+async def remove(ctx, *, position: int):
+    player = cast(wavelink.Player, ctx.voice_client)
+
+    if not player:
+        await ctx.send("Please join a voice channel first before using this command.")
+        return
+
+    if position < 1 or position > len(player.queue):
+        await ctx.send("Invalid position. Please provide a valid position within the queue.")
+        return
+
+    removed_track = player.queue.delete(position - 1)
+    await ctx.send(f"Removed **`{removed_track}`** from the queue at position {position}.")
+
+@client.command()
+async def skip(ctx: commands.Context) -> None:
+    player: wavelink.Player = cast(wavelink.Player, ctx.voice_client)
+    if not player:
+        return
+
+    await player.skip(force=True)
+    await ctx.message.add_reaction("\u2705")
+
 @client.command(name="resume")
 async def pause_resume(ctx: commands.Context) -> None:
     player: wavelink.Player = cast(wavelink.Player, ctx.voice_client)
