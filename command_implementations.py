@@ -1,17 +1,19 @@
 import wavelink
 import functions
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
+import asyncio
 from typing import cast
 
 intents = discord.Intents.all()
 
 client = commands.Bot(intents=intents, command_prefix="!")
 
-
 @client.event
 async def on_ready():
     print("Bot is ready.")
+    check_idle.start()
+    check_alone.start()
     client.loop.create_task(functions.node_connect())
 
 
@@ -42,6 +44,21 @@ async def disconnect(ctx):
         await vc.disconnect()
     else:
         await ctx.send("I'm not connected to any channels")
+
+
+@tasks.loop(seconds=300)
+async def check_idle():
+    print("Timer check idle")
+    for vc in client.voice_clients: # Check for every channel that the bot is connected to
+        if not vc.is_playing(): # If not playing audio
+            await vc.disconnect()
+
+@tasks.loop(seconds=300)
+async def check_alone():
+    print("Timer check alone")
+    for vc in client.voice_clients:  # Check for every channel that the bot is connected to
+        if len(vc.channel.members) == 1 and client.user in vc.channel.members:  # If only the bot is connected
+            await vc.disconnect()
 
 
 @client.command()
@@ -120,6 +137,7 @@ async def pause_resume(ctx: commands.Context) -> None:
     await ctx.message.add_reaction("\u2705") #add ok react to command
 
 
+
 @client.command(name="queue")
 async def queue(ctx: commands.Context):
     player: wavelink.Player = cast(wavelink.Player, ctx.voice_client)
@@ -137,5 +155,4 @@ async def queue(ctx: commands.Context):
             embed.description += f"\n{i + 1}.**{queue.peek(i).title}** by `{queue.peek(i).author}`"
 
         await ctx.send(embed = embed)
-
 
