@@ -135,11 +135,6 @@ async def pause_resume(ctx: commands.Context) -> None:
         return
     await player.pause(True)
     await ctx.message.add_reaction("\u2705") #add ok react to command
-@client.command(name="skip")
-async def skip(ctx: commands.Context) -> None:
-    player: wavelink.Player = cast(wavelink.Player, ctx.voice_client)
-    if not player:
-        return
 
 @client.command(name="queue")
 async def queue(ctx: commands.Context):
@@ -158,16 +153,3 @@ async def queue(ctx: commands.Context):
             embed.description += f"\n{i + 1}.**{queue.peek(i).title}** by `{queue.peek(i).author}`"
 
         await ctx.send(embed = embed)
-
-@client.command(name="skip")
-async def skip(ctx: commands.Context) -> None:
-    player: wavelink.Player = cast(wavelink.Player, ctx.voice_client)
-    if not player:
-        return
-
-    if player.playing:
-        await player.skip(force=True)
-        await ctx.message.add_reaction("\u2705")
-    else:
-        await ctx.send("There is no song playing")
-        await ctx.message.add_reaction("\u274C")  # add X react to command
