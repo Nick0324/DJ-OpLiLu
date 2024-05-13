@@ -174,3 +174,12 @@ async def skip(ctx: commands.Context) -> None:
     else:
         await ctx.send("There is no song playing")
         await ctx.message.add_reaction("\u274C")  # add X react to command
+
+@client.command(name="clear", pass_ctx=True)
+async def clear(ctx):
+    player: wavelink.Player = cast(wavelink.Player, ctx.voice_client)
+    if not player.queue:
+        await ctx.send("The queue is already empty.")
+        return
+    player.queue.clear()
+    await ctx.send("Cleared the queue successfully.")
