@@ -19,8 +19,6 @@ async def on_ready():
 async def on_wavelink_node_ready(node: wavelink.Node):
     print(f"Node is ready.")
 
-
-
 @client.command(name="join", pass_ctx=True)
 async def join(ctx):
 
@@ -79,6 +77,22 @@ async def play(ctx, *, query: str):
 
     if not player.playing:
         await player.play(player.queue.get())
+
+@client.command()
+async def remove(ctx, *, position: int):
+    player = cast(wavelink.Player, ctx.voice_client)
+
+    if not player:
+        await ctx.send("Please join a voice channel first before using this command.")
+        return
+
+    if position < 1 or position > len(player.queue):
+        await ctx.send("Invalid position. Please provide a valid position within the queue.")
+        return
+
+    removed_track = player.queue.peek(position - 1)
+    player.queue.delete(position - 1)
+    await ctx.send(f"Removed **`{removed_track.title}`** from the queue at position {position}.")
 
 @client.command(name="resume")
 async def pause_resume(ctx: commands.Context) -> None:
