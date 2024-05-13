@@ -25,8 +25,6 @@ async def join(ctx):
     voice = discord.utils.get(client.voice_clients,guild=ctx.guild)
     role = discord.utils.get(ctx.author.roles, name="dj")
 
-    cast(wavelink.Player, ctx.voice_client)
-
     if role:
         if voice == None:
             await functions.join_channel(ctx)
@@ -60,8 +58,6 @@ async def play(ctx, *, query: str):
             await ctx.send("I was unable to join this voice channel. Please try again.")
             return
 
-    else:
-        pass
 
     player.autoplay = wavelink.AutoPlayMode.partial
 
