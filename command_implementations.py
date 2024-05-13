@@ -25,6 +25,8 @@ async def join(ctx):
     voice = discord.utils.get(client.voice_clients,guild=ctx.guild)
     role = discord.utils.get(ctx.author.roles, name="dj")
 
+    cast(wavelink.Player, ctx.voice_client)
+
     if role:
         if voice == None:
             await functions.join_channel(ctx)
@@ -57,6 +59,9 @@ async def play(ctx, *, query: str):
         except discord.ClientException:
             await ctx.send("I was unable to join this voice channel. Please try again.")
             return
+
+    else:
+        pass
 
     player.autoplay = wavelink.AutoPlayMode.partial
 
@@ -119,6 +124,22 @@ async def pause_resume(ctx: commands.Context) -> None:
     await ctx.message.add_reaction("\u2705") #add ok react to command
 
 
+@client.command(name="queue")
+async def queue(ctx: commands.Context):
+    player: wavelink.Player = cast(wavelink.Player, ctx.voice_client)
+    if not player:
+        return
 
+    queue = player.queue
+    if not queue:
+        await ctx.send("There are no songs in queue")
+    else:
+        queue_size = len(queue)
+        embed: discord.Embed = discord.Embed(title="Song Queue")
+        embed.description = ""
+        for i in range(queue_size):
+            embed.description += f"\n{i + 1}.**{queue.peek(i).title}** by `{queue.peek(i).author}`"
+
+        await ctx.send(embed = embed)
 
 
