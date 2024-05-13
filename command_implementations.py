@@ -75,6 +75,7 @@ async def play(ctx, *, query: str):
             await ctx.send("I was unable to join this voice channel. Please try again.")
             return
 
+
     player.autoplay = wavelink.AutoPlayMode.partial
 
     if not hasattr(player, "home"):
@@ -134,15 +135,21 @@ async def pause_resume(ctx: commands.Context) -> None:
         return
     await player.pause(True)
     await ctx.message.add_reaction("\u2705") #add ok react to command
-@client.command(name="skip")
-async def skip(ctx: commands.Context) -> None:
+
+@client.command(name="queue")
+async def queue(ctx: commands.Context):
     player: wavelink.Player = cast(wavelink.Player, ctx.voice_client)
     if not player:
         return
 
-    if player.playing:
-        await player.skip(force=True)
-        await ctx.message.add_reaction("\u2705")
+    queue = player.queue
+    if not queue:
+        await ctx.send("There are no songs in queue")
     else:
-        await ctx.send("There is no song playing")
-        await ctx.message.add_reaction("\u274C")  # add X react to command
+        queue_size = len(queue)
+        embed: discord.Embed = discord.Embed(title="Song Queue")
+        embed.description = ""
+        for i in range(queue_size):
+            embed.description += f"\n{i + 1}.**{queue.peek(i).title}** by `{queue.peek(i).author}`"
+
+        await ctx.send(embed = embed)
