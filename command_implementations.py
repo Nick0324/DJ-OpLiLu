@@ -38,13 +38,21 @@ async def join(ctx):
 
 @client.command(name="disconnect", pass_ctx=True)
 async def disconnect(ctx):
+    if not ctx.guild.voice_client:
+        await ctx.send("I'm not connected to any voice channels.")
+        return
+    if ctx.author.voice is None:
+        await ctx.send("You are not in a voice channel.")
+        return
+    if ctx.author.voice.channel != ctx.guild.voice_client.channel:
+        await ctx.send("You are not in the same voice channel as me.")
+        return
     role = discord.utils.get(ctx.author.roles, name="dj")
-    if role:
-        vc = ctx.message.guild.voice_client
-        await vc.disconnect()
-    else:
-        await ctx.send("I'm not connected to any channels")
-
+    if not role:
+        await ctx.send("You don't have permission to disconnect me.")
+        return
+    await ctx.guild.voice_client.disconnect()
+    await ctx.send("Disconnected successfully.")
 
 @tasks.loop(seconds=300)
 async def check_idle():
