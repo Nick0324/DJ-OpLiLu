@@ -183,3 +183,16 @@ async def clear(ctx):
         return
     player.queue.clear()
     await ctx.send("Cleared the queue successfully.")
+
+@client.command(name="playing", pass_ctx=True)
+async def playing(ctx):
+    player: wavelink.Player = cast(wavelink.Player, ctx.voice_client)
+    if not player or not player.is_playing:
+        await ctx.send("There is no song currently playing.")
+        return
+    current_song = player.current
+    title = current_song.title
+    artist = current_song.author
+    timestamp = str(current_song.position // 1000) + "s"
+    message = f"Currently playing: **{title}** by `{artist}` (Timestamp: {timestamp})"
+    await ctx.send(message)
