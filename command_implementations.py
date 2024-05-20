@@ -17,7 +17,6 @@ async def on_ready():
     check_alone.start()
     client.loop.create_task(functions.node_connect())
 
-
 @client.event
 async def on_wavelink_node_ready(node: wavelink.Node):
     print(f"Node is ready.")
