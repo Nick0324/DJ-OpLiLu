@@ -16,7 +16,6 @@ async def on_ready():
     check_alone.start()
     client.loop.create_task(functions.node_connect())
 
-
 @client.event
 async def on_wavelink_node_ready(node: wavelink.Node):
     print(f"Node is ready.")
@@ -46,14 +45,14 @@ async def disconnect(ctx):
         await ctx.send("I'm not connected to any channels")
 
 
-@tasks.loop(seconds=300)
+@tasks.loop(seconds=30)
 async def check_idle():
     print("Timer check idle")
     for vc in client.voice_clients: # Check for every channel that the bot is connected to
         if not vc.is_playing(): # If not playing audio
             await vc.disconnect()
 
-@tasks.loop(seconds=300)
+@tasks.loop(seconds=30)
 async def check_alone():
     print("Timer check alone")
     for vc in client.voice_clients:  # Check for every channel that the bot is connected to
