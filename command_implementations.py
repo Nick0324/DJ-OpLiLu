@@ -9,6 +9,7 @@ intents = discord.Intents.all()
 
 client = commands.Bot(intents=intents, command_prefix="!")
 
+
 @client.event
 async def on_ready():
     print("Bot is ready.")
@@ -20,10 +21,10 @@ async def on_ready():
 async def on_wavelink_node_ready(node: wavelink.Node):
     print(f"Node is ready.")
 
+
 @client.command(name="join", pass_ctx=True)
 async def join(ctx):
-
-    voice = discord.utils.get(client.voice_clients,guild=ctx.guild)
+    voice = discord.utils.get(client.voice_clients, guild=ctx.guild)
     role = discord.utils.get(ctx.author.roles, name="dj")
 
     if role:
@@ -45,14 +46,15 @@ async def disconnect(ctx):
         await ctx.send("I'm not connected to any channels")
 
 
-@tasks.loop(seconds=30)
+@tasks.loop(seconds=300)
 async def check_idle():
     print("Timer check idle")
-    for vc in client.voice_clients: # Check for every channel that the bot is connected to
-        if not vc.is_playing(): # If not playing audio
+    for vc in client.voice_clients:  # Check for every channel that the bot is connected to
+        if not vc.is_playing():  # If not playing audio
             await vc.disconnect()
 
-@tasks.loop(seconds=30)
+
+@tasks.loop(seconds=300)
 async def check_alone():
     print("Timer check alone")
     for vc in client.voice_clients:  # Check for every channel that the bot is connected to
@@ -94,6 +96,7 @@ async def play(ctx, *, query: str):
     if not player.playing:
         await player.play(player.queue.get())
 
+
 @client.command()
 async def remove(ctx, *, position: int):
     player = cast(wavelink.Player, ctx.voice_client)
@@ -110,6 +113,7 @@ async def remove(ctx, *, position: int):
     player.queue.delete(position - 1)
     await ctx.send(f"Removed **`{removed_track.title}`** from the queue at position {position}.")
 
+
 @client.command(name="resume")
 async def pause_resume(ctx: commands.Context) -> None:
     player: wavelink.Player = cast(wavelink.Player, ctx.voice_client)
@@ -120,7 +124,8 @@ async def pause_resume(ctx: commands.Context) -> None:
         await ctx.message.add_reaction("\u274C")  # add X react to command
         return
     await player.pause(False)
-    await ctx.message.add_reaction("\u2705") #add ok react to command
+    await ctx.message.add_reaction("\u2705")  # add ok react to command
+
 
 @client.command(name="pause")
 async def pause_resume(ctx: commands.Context) -> None:
@@ -132,6 +137,56 @@ async def pause_resume(ctx: commands.Context) -> None:
         await ctx.message.add_reaction("\u274C")  # add X react to command
         return
     await player.pause(True)
-    await ctx.message.add_reaction("\u2705") #add ok react to command
+    await ctx.message.add_reaction("\u2705")  # add ok react to command
 
 
+@client.command(name="queue")
+async def queue(ctx: commands.Context):
+    player: wavelink.Player = cast(wavelink.Player, ctx.voice_client)
+    if not player:
+        return
+
+    queue = player.queue
+    if not queue:
+        await ctx.send("There are no songs in queue")
+    else:
+        queue_size = len(queue)
+        embed: discord.Embed = discord.Embed(title="Song Queue")
+        embed.description = ""
+        for i in range(queue_size):
+            embed.description += f"\n{i + 1}.**{queue.peek(i).title}** by `{queue.peek(i).author}`"
+
+        await ctx.send(embed=embed)
+
+
+@client.command(name="skip")
+async def skip(ctx: commands.Context) -> None:
+    player: wavelink.Player = cast(wavelink.Player, ctx.voice_client)
+    if not player:
+        return
+
+    if player.playing:
+        await player.skip(force=True)
+        await ctx.message.add_reaction("\u2705")
+    else:
+        await ctx.send("There is no song playing")
+        await ctx.message.add_reaction("\u274C")  # add X react to command
+
+
+@client.command(name="shuffle")
+async def shuffle(ctx: commands.Context):
+    player: wavelink.Player = cast(wavelink.Player, ctx.voice_client)
+    if not player:
+        return
+
+    queue = player.queue
+    if not queue:
+        await ctx.send("There are no songs in queue")
+    else:
+        queue.shuffle()
+        embed: discord.Embed = discord.Embed(title="Shuffled Queue:")
+        embed.description = ""
+        for i in range(len(queue)):
+            embed.description += f"\n{i + 1}.**{queue.peek(i).title}** by `{queue.peek(i).author}`"
+
+        await ctx.send(embed=embed)
