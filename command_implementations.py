@@ -191,3 +191,18 @@ async def shuffle(ctx: commands.Context):
             embed.description += f"\n{i + 1}.**{queue.peek(i).title}** by `{queue.peek(i).author}`"
 
         await ctx.send(embed=embed)
+
+
+@client.command(name="commands")
+async def commands(ctx: commands.Context):
+    with open("commands.txt", 'r') as file:
+        lines = file.readlines()
+    embed = discord.Embed(title="Bot Commands", color=discord.Color.blue())
+    for line in lines:
+        if '-' in line:
+            cmd, desc = line.split('-', 1)
+            cmd = cmd.strip()
+            desc = desc.strip()
+            embed.add_field(name=cmd, value=desc, inline=False)
+
+    await ctx.send(embed=embed)
