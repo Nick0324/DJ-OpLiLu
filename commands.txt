@@ -7,3 +7,4 @@
 !resumes - Resumes the song if it's paused
 !skip - Skips the current song playing
 !shuffle - Shuffles the queue, making the order of the songs random
+!help - Displays all available commands
