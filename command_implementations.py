@@ -191,3 +191,41 @@ async def shuffle(ctx: commands.Context):
             embed.description += f"\n{i + 1}.**{queue.peek(i).title}** by `{queue.peek(i).author}`"
 
         await ctx.send(embed=embed)
+
+
+@client.command(name="commands")
+async def commands(ctx: commands.Context):
+    with open("commands.txt", 'r') as file:
+        lines = file.readlines()
+    embed = discord.Embed(title="Bot Commands", color=discord.Color.blue())
+    for line in lines:
+        if '-' in line:
+            cmd, desc = line.split('-', 1)
+            cmd = cmd.strip()
+            desc = desc.strip()
+            embed.add_field(name=cmd, value=desc, inline=False)
+
+    await ctx.send(embed=embed)
+
+
+@client.command(name="playing")
+async def playing(ctx: commands.Context):
+    player: wavelink.Player = cast(wavelink.Player, ctx.voice_client)
+    if not player:
+        return
+
+    if not player.playing:
+        await ctx.send("Nothing is currently playing.")
+
+    track = player.current
+
+    duration_in_seconds = track.length / 1000  # Convert milliseconds to seconds
+    time = await functions.format_time(duration_in_seconds)
+    embed = discord.Embed(title="🔥 Now playing", description=f"```{track.title}```",
+                          color=discord.Color.blue())
+    embed.set_image(url=track.artwork)
+    embed.add_field(name="✍️Author", value=f"``{track.author}``", inline=True)
+    embed.add_field(name="⌛ Duration", value=f"``{time}``", inline=True)
+    embed.set_footer(text=f"{len(player.queue)} songs in queue.")
+
+    await ctx.send(embed=embed)
